@@ -1,11 +1,12 @@
 #ifndef LIBXRME_HANDLER_H
 #define LIBXRME_HANDLER_H
 
-class Connection;
-
 namespace gloox {
   class Client;
 }
+
+namespace xrme {
+class Connection;
 
 class Handler {
 public:
@@ -19,5 +20,7 @@ protected:
   Connection* connection_;
   gloox::Client* client_;
 };
+
+} // namespace xrme
 
 #endif // LIBXRME_HANDLER_H

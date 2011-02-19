@@ -8,7 +8,7 @@
 ClientMainWindow::ClientMainWindow(QWidget* parent)
     : QDialog(parent),
       ui_(new Ui_ClientMainWindow),
-      connection_(new Connection(this))
+      connection_(new xrme::Connection(this))
 {
   ui_->setupUi(this);
   QPushButton* update_state =
@@ -27,8 +27,8 @@ ClientMainWindow::ClientMainWindow(QWidget* parent)
 
   connect(connection_, SIGNAL(Connected()), SLOT(Connected()));
   connect(connection_, SIGNAL(Disconnected(QString)), SLOT(Disconnected(QString)));
-  connect(connection_, SIGNAL(PeerFound(Connection::Peer)), SLOT(PeerFound(Connection::Peer)));
-  connect(connection_, SIGNAL(PeerRemoved(Connection::Peer)), SLOT(PeerRemoved(Connection::Peer)));
+  connect(connection_, SIGNAL(PeerFound(xrme::Connection::Peer)), SLOT(PeerFound(xrme::Connection::Peer)));
+  connect(connection_, SIGNAL(PeerRemoved(xrme::Connection::Peer)), SLOT(PeerRemoved(xrme::Connection::Peer)));
 }
 
 ClientMainWindow::~ClientMainWindow() {
@@ -103,18 +103,18 @@ void ClientMainWindow::Disconnected(const QString& error) {
   }
 }
 
-void ClientMainWindow::PeerFound(const Connection::Peer& peer) {
+void ClientMainWindow::PeerFound(const xrme::Connection::Peer& peer) {
   ui_->peers->addItem(peer.agent_name_, peer.jid_resource_);
 }
 
-void ClientMainWindow::PeerRemoved(const Connection::Peer& peer) {
+void ClientMainWindow::PeerRemoved(const xrme::Connection::Peer& peer) {
   int index = ui_->peers->findData(peer.jid_resource_);
   if (index != -1) {
     ui_->peers->removeItem(index);
   }
 }
 
-void ClientMainWindow::StateChanged(const QString& peer_jid_resource, const State& state) {
+void ClientMainWindow::StateChanged(const QString& peer_jid_resource, const xrme::State& state) {
   ui_->title->setText(state.metadata.title);
   ui_->artist->setText(state.metadata.artist);
   ui_->album->setText(state.metadata.album);

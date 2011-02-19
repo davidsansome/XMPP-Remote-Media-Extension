@@ -1,5 +1,7 @@
 #include "common.h"
 
+namespace xrme {
+
 const char* kXmlnsXrme = "http://purplehatstands.com/xmlns/xrme";
 const char* kXmlnsXrmeMediaPlayer = "http://purplehatstands.com/xmlns/xrme/mediaplayer";
 const char* kXmlnsXrmeRemoteControl = "http://purplehatstands.com/xmlns/xrme/remotecontrol";
@@ -20,3 +22,5 @@ State::State()
       can_go_previous(false),
       can_seek(false) {
 }
+
+} // namespace xrme

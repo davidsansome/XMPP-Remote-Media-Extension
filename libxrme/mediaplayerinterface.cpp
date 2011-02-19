@@ -3,6 +3,8 @@
 
 #include <QtDebug>
 
+namespace xrme {
+
 struct MediaPlayerInterface::Private {
   Private()
     : handler_(NULL) {}
@@ -37,3 +39,5 @@ void MediaPlayerInterface::AlbumArtChanged() {
 void MediaPlayerInterface::Attach(MediaPlayerHandler* handler) {
   d->handler_ = handler;
 }
+
+} // namespace xrme

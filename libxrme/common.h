@@ -3,6 +3,12 @@
 
 #include <QString>
 
+namespace xrme {
+
+extern const char* kXmlnsXrme;
+extern const char* kXmlnsXrmeMediaPlayer;
+extern const char* kXmlnsXrmeRemoteControl;
+
 struct Metadata {
   Metadata();
 
@@ -37,8 +43,6 @@ struct State {
   Metadata metadata;
 };
 
-extern const char* kXmlnsXrme;
-extern const char* kXmlnsXrmeMediaPlayer;
-extern const char* kXmlnsXrmeRemoteControl;
+} // namespace xrme
 
 #endif // XRME_COMMON_H

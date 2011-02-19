@@ -9,7 +9,7 @@
 class Ui_ClientMainWindow;
 
 class ClientMainWindow : public QDialog,
-                         protected RemoteControlInterface {
+                         protected xrme::RemoteControlInterface {
   Q_OBJECT
 
 public:
@@ -17,8 +17,8 @@ public:
   ~ClientMainWindow();
 
 protected:
-  // RemoteControlInterface
-  void StateChanged(const QString& peer_jid_resource, const State& state);
+  // xrme::RemoteControlInterface
+  void StateChanged(const QString& peer_jid_resource, const xrme::State& state);
   void AlbumArtChanged(const QString& peer_jid_resource, const QImage& art);
 
 private slots:
@@ -31,16 +31,16 @@ private slots:
   void RefreshClicked();
   void UpdateStateClicked();
 
-  // From Connection
+  // From xrme::Connection
   void Connected();
   void Disconnected(const QString& error);
-  void PeerFound(const Connection::Peer& peer);
-  void PeerRemoved(const Connection::Peer& peer);
+  void PeerFound(const xrme::Connection::Peer& peer);
+  void PeerRemoved(const xrme::Connection::Peer& peer);
 
 private:
   Ui_ClientMainWindow* ui_;
 
-  Connection* connection_;
+  xrme::Connection* connection_;
 };
 
 #endif // CLIENTMAINWINDOW_H

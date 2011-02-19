@@ -4,9 +4,11 @@
 #include "common.h"
 #include "connection.h"
 
-class RemoteControlHandler;
-
 class QImage;
+
+namespace xrme {
+
+class RemoteControlHandler;
 
 class RemoteControlInterface {
 public:
@@ -41,5 +43,7 @@ private:
   struct Private;
   QScopedPointer<Private> d;
 };
+
+} // namespace xrme
 
 #endif // XRME_REMOTECONTROLINTERFACE_H

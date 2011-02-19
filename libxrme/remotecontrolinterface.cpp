@@ -1,6 +1,8 @@
 #include "remotecontrolhandler.h"
 #include "remotecontrolinterface.h"
 
+namespace xrme {
+
 struct RemoteControlInterface::Private {
   Private()
     : handler_(NULL) {}
@@ -50,3 +52,4 @@ void RemoteControlInterface::Attach(RemoteControlHandler* handler) {
   d->handler_ = handler;
 }
 
+} // namespace xrme

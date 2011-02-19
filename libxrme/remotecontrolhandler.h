@@ -7,6 +7,8 @@
 
 #include <gloox/iqhandler.h>
 
+namespace xrme {
+
 class RemoteControlInterface;
 
 class RemoteControlHandler : public Handler,
@@ -38,5 +40,7 @@ private:
 private:
   RemoteControlInterface* interface_;
 };
+
+} // namespace xrme
 
 #endif // REMOTECONTROLHANDLER_H

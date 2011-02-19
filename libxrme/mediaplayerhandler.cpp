@@ -9,6 +9,8 @@
 #include <gloox/client.h>
 #include <gloox/disco.h>
 
+namespace xrme {
+
 MediaPlayerHandler::MediaPlayerHandler(MediaPlayerInterface* interface)
     : interface_(interface) {
   interface_->Attach(this);
@@ -126,3 +128,5 @@ bool MediaPlayerHandler::handleIq(gloox::Stanza* stanza) {
 
   return true;
 }
+
+} // namespace xrme

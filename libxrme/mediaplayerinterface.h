@@ -6,6 +6,8 @@
 #include <QImage>
 #include <QScopedPointer>
 
+namespace xrme {
+
 class MediaPlayerHandler;
 
 class MediaPlayerInterface {
@@ -42,5 +44,7 @@ private:
   struct Private;
   QScopedPointer<Private> d;
 };
+
+} // namespace xrme
 
 #endif // LIBXRME_MEDIAPLAYERINTERFACE_H

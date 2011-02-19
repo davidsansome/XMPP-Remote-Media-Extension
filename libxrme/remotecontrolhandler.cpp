@@ -25,6 +25,8 @@
 #include <gloox/client.h>
 #include <gloox/disco.h>
 
+namespace xrme {
+
 RemoteControlHandler::RemoteControlHandler(RemoteControlInterface* interface)
     : interface_(interface) {
   interface_->Attach(this);
@@ -139,3 +141,5 @@ bool RemoteControlHandler::handleIq(gloox::Stanza* stanza) {
 
   return state || album_art;
 }
+
+} // namespace xrme

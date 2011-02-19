@@ -16,6 +16,7 @@
 #include <gloox/rosterlistener.h>
 #include <gloox/rostermanager.h>
 
+namespace xrme {
 
 struct Connection::Private : public gloox::ConnectionListener,
                              public gloox::LogHandler,
@@ -488,3 +489,5 @@ void Connection::Private::handleDiscoError(gloox::Stanza* stanza, int context) {
     }
   }
 }
+
+} // namespace xrme

@@ -6,6 +6,8 @@
 #include <QScopedPointer>
 #include <QString>
 
+namespace xrme {
+
 class MediaPlayerInterface;
 class RemoteControlInterface;
 
@@ -106,8 +108,8 @@ signals:
   void Connected();
   void Disconnected(const QString& error);
 
-  void PeerFound(const Connection::Peer& peer);
-  void PeerRemoved(const Connection::Peer& peer);
+  void PeerFound(const xrme::Connection::Peer& peer);
+  void PeerRemoved(const xrme::Connection::Peer& peer);
 
 private slots:
   void SocketReadyReceive();
@@ -118,5 +120,7 @@ private:
   friend struct Private;
   QScopedPointer<Private> d;
 };
+
+} // namespace xrme
 
 #endif

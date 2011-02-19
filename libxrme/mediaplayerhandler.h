@@ -5,6 +5,8 @@
 
 #include <gloox/iqhandler.h>
 
+namespace xrme {
+
 class MediaPlayerInterface;
 
 class MediaPlayerHandler : public Handler,
@@ -27,5 +29,7 @@ public:
 private:
   MediaPlayerInterface* interface_;
 };
+
+} // namespace xrme
 
 #endif // LIBXRME_MEDIAPLAYERHANDLER_H
