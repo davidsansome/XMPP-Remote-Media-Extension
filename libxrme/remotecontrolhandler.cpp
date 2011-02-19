@@ -19,23 +19,22 @@
 #include "remotecontrolinterface.h"
 #include "remotecontrolhandler.h"
 
+#include <QImage>
 #include <QtDebug>
 
 #include <gloox/client.h>
 #include <gloox/disco.h>
-
-const char* RemoteControlHandler::kXmlNs = "http://purplehatstands.com/xmlns/xrmeremotecontrol";
 
 RemoteControlHandler::RemoteControlHandler(RemoteControlInterface* interface)
     : interface_(interface) {
   interface_->Attach(this);
 }
 
-void RemoteControlHandler::Init(gloox::Client* client) {
-  Handler::Init(client);
+void RemoteControlHandler::Init(Connection* connection, gloox::Client* client) {
+  Handler::Init(connection, client);
 
-  client->registerIqHandler(this, kXmlNs);
-  client->disco()->addFeature(kXmlNs);
+  client->registerIqHandler(this, kXmlnsXrmeRemoteControl);
+  client->disco()->addFeature(kXmlnsXrmeRemoteControl);
 }
 
 void RemoteControlHandler::SendIQ(const QString& jid_resource,
@@ -49,8 +48,9 @@ void RemoteControlHandler::SendIQ(const QString& jid_resource,
   to.setResource(jid_resource.toUtf8().constData());
 
   gloox::Tag* stanza = gloox::Stanza::createIqStanza(
-        to, client_->getID(), type, MediaPlayerHandler::kXmlNs);
-  new gloox::Tag(stanza, command.toUtf8().constData());
+        to, client_->getID(), type, kXmlnsXrmeMediaPlayer);
+  gloox::Tag* c = new gloox::Tag(stanza, command.toUtf8().constData());
+  c->addAttribute("xmlns", kXmlnsXrmeMediaPlayer);
 
   client_->send(stanza);
 }
@@ -75,12 +75,67 @@ void RemoteControlHandler::QueryState(const QString& jid_resource) {
   SendIQ(jid_resource, gloox::StanzaIqGet, "querystate");
 }
 
-bool RemoteControlHandler::handleIq(gloox::Stanza* stanza) {
-  qDebug() << __PRETTY_FUNCTION__ << stanza->xml().c_str();
-  return true;
+int RemoteControlHandler::ParseInt(gloox::Tag* tag, const char* attribute_name) {
+  return ParseString(tag, attribute_name).toInt();
 }
 
-bool RemoteControlHandler::handleIqID(gloox::Stanza* stanza, int context) {
-  qDebug() << __PRETTY_FUNCTION__ << stanza->xml().c_str();
-  return true;
+double RemoteControlHandler::ParseDouble(gloox::Tag* tag, const char* attribute_name) {
+  return ParseString(tag, attribute_name).toFloat();
+}
+
+QString RemoteControlHandler::ParseString(gloox::Tag* tag, const char* attribute_name) {
+  return QString::fromUtf8(tag->findAttribute(attribute_name).c_str());
+}
+
+bool RemoteControlHandler::handleIq(gloox::Stanza* stanza) {
+  // Ignore stanzas from anyone else
+  if (stanza->from().bareJID() != client_->jid().bareJID()) {
+    return false;
+  }
+
+  QString resource = QString::fromUtf8(stanza->from().resource().c_str());
+
+  qDebug() << resource << stanza->xml().c_str();
+
+  gloox::Tag* state = stanza->findChild("state");
+  if (state) {
+    gloox::Tag* metadata = state->findChild("metadata");
+    if (metadata) {
+      State s;
+      s.playback_state    = State::PlaybackState(ParseInt(state, "playback_state"));
+      s.position_millisec = ParseInt(state, "position_millisec");
+      s.volume            = ParseDouble(state, "volume");
+      s.can_go_next       = ParseInt(state, "can_go_next");
+      s.can_go_previous   = ParseInt(state, "can_go_previous");
+      s.can_seek          = ParseInt(state, "can_seek");
+
+      s.metadata.title    = ParseString(metadata, "title");
+      s.metadata.artist   = ParseString(metadata, "artist");
+      s.metadata.album    = ParseString(metadata, "album");
+      s.metadata.albumartist = ParseString(metadata, "albumartist");
+      s.metadata.composer = ParseString(metadata, "composer");
+      s.metadata.genre    = ParseString(metadata, "genre");
+      s.metadata.track    = ParseInt(metadata, "track");
+      s.metadata.disc     = ParseInt(metadata, "disc");
+      s.metadata.year     = ParseInt(metadata, "year");
+      s.metadata.length_millisec = ParseInt(metadata, "length_millisec");
+      s.metadata.rating   = ParseDouble(metadata, "rating");
+
+      interface_->StateChanged(resource, s);
+    }
+  }
+
+  gloox::Tag* album_art = stanza->findChild("album_art");
+  if (album_art) {
+    QByteArray data(album_art->cdata().c_str(), album_art->cdata().size());
+
+    QImage image;
+    if (!data.isEmpty()) {
+      image.loadFromData(QByteArray::fromBase64(data), "JPEG");
+    }
+
+    interface_->AlbumArtChanged(resource, image);
+  }
+
+  return state || album_art;
 }

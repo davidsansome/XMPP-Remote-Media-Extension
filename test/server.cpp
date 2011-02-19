@@ -15,7 +15,7 @@ public:
   State state() const {
     State ret;
     ret.playback_state = State::PlaybackState_Playing;
-    ret.position_nanosec = 0;
+    ret.position_millisec = 0;
     ret.volume = 0.5;
     ret.can_go_next = true;
     ret.can_go_previous = true;
@@ -24,13 +24,15 @@ public:
     ret.metadata.artist = "Monty Python";
     ret.metadata.album = "Monty Python Sings";
     ret.metadata.track = 4;
-    ret.metadata.length_nanosec = 42000000000;
+    ret.metadata.disc = 1;
+    ret.metadata.year = 2005;
+    ret.metadata.length_millisec = 42000;
     ret.metadata.rating = 1.0;
     return ret;
   }
 
   QImage album_art() const {
-    return QImage();
+    return QImage(":/trolltech/qmessagebox/images/qtlogo-64.png");
   }
 };
 

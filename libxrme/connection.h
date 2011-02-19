@@ -32,6 +32,7 @@ public:
     QString jid_resource_;
     Capabilities caps_;
   };
+  typedef QList<Peer> PeerList;
 
   // The username and password MUST be set before calling Connect().
   void set_username(const QString& username);
@@ -79,6 +80,14 @@ public:
   // true.  Before the connection is complete it will return a null QString.
   QString jid() const;
 
+  // Returns the list of all known peers.  You can refresh this list by calling
+  // RefreshPeers().  PeerFound() is emitted any time a peer is added to this
+  // list.
+  PeerList peers() const;
+
+  // Returns the list of known peers that support a certain capability.
+  PeerList peers(Peer::Capability cap) const;
+
 public slots:
   // Starts connecting and returns immediately.  Will emit Connected() or
   // Disconnected() later.  The username and password must already be set.
@@ -98,6 +107,7 @@ signals:
   void Disconnected();
 
   void PeerFound(const Connection::Peer& peer);
+  void PeerRemoved(const Connection::Peer& peer);
 
 private slots:
   void SocketReadyReceive();

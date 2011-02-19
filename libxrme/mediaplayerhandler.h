@@ -12,13 +12,13 @@ class MediaPlayerHandler : public Handler,
 public:
   MediaPlayerHandler(MediaPlayerInterface* interface);
 
-  static const char* kXmlNs;
+  static const int kMaxAlbumArtSize = 300;
 
   void StateChanged();
   void AlbumArtChanged();
 
   // Handler
-  void Init(gloox::Client* client);
+  void Init(Connection* connection, gloox::Client* client);
 
   // gloox::IqHandler
   bool handleIq(gloox::Stanza* stanza);

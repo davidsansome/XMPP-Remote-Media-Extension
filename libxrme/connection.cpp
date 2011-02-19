@@ -1,3 +1,4 @@
+#include "common.h"
 #include "connection.h"
 #include "mediaplayerhandler.h"
 #include "remotecontrolhandler.h"
@@ -36,7 +37,6 @@ struct Connection::Private : public gloox::ConnectionListener,
   static const char* kDefaultServer;
   static const char* kDefaultJIDResource;
   static const char* kDefaultJIDHost;
-  static const char* kXmlNs;
 
   Connection* parent_;
 
@@ -108,7 +108,6 @@ struct Connection::Private : public gloox::ConnectionListener,
 const char* Connection::Private::kDefaultServer = "talk.google.com";
 const char* Connection::Private::kDefaultJIDResource = "xrmeagent";
 const char* Connection::Private::kDefaultJIDHost = "gmail.com";
-const char* Connection::Private::kXmlNs = "http://purplehatstands.com/xmlns/xrme";
 
 
 Connection::Connection(QObject* parent)
@@ -191,6 +190,23 @@ QString Connection::jid() const {
   return QString();
 }
 
+Connection::PeerList Connection::peers() const {
+  if (is_connected()) {
+    return d->peers_;
+  }
+  return PeerList();
+}
+
+Connection::PeerList Connection::peers(Peer::Capability cap) const {
+  PeerList ret;
+  foreach (const Peer& peer, peers()) {
+    if (peer.caps_ & cap) {
+      ret << peer;
+    }
+  }
+  return ret;
+}
+
 bool Connection::Connect() {
   if (d->username_.isEmpty() || d->password_.isEmpty() || d->agent_name_.isEmpty()) {
     qWarning() << __PRETTY_FUNCTION__
@@ -216,7 +232,7 @@ bool Connection::Connect() {
   // Add listeners
   d->client_->registerConnectionListener(d.data());
   d->client_->registerMessageHandler(d.data());
-  d->client_->registerIqHandler(d.data(), Private::kXmlNs);
+  d->client_->registerIqHandler(d.data(), kXmlnsXrme);
   d->client_->rosterManager()->registerRosterListener(d.data());
   d->client_->logInstance().registerLogHandler(
         gloox::LogLevelDebug, gloox::LogAreaAll, d.data());
@@ -224,11 +240,11 @@ bool Connection::Connect() {
   // Setup disco
   d->client_->disco()->setIdentity("client", "bot");
   d->client_->disco()->setVersion(d->agent_name_.toUtf8().constData(), std::string());
-  d->client_->disco()->addFeature(Private::kXmlNs);
+  d->client_->disco()->addFeature(kXmlnsXrme);
 
   // Initialise the handlers
   foreach (Handler* handler, d->handlers_) {
-    handler->Init(d->client_.data());
+    handler->Init(this, d->client_.data());
   }
 
   // Set presence
@@ -275,6 +291,9 @@ void Connection::Private::onDisconnect(gloox::ConnectionError e) {
   socket_notifier_->setEnabled(false);
   socket_notifier_.reset();
   client_.reset();
+  peers_.clear();
+  querying_peers_.clear();
+
   emit parent_->Disconnected();
 }
 
@@ -321,18 +340,47 @@ Connection::Peer::Peer()
 }
 
 void Connection::Private::handleRosterPresence(
-    const gloox::RosterItem& item, const std::string& resource,
-    gloox::Presence presence, const std::string& msg) {
-  if (item.jid() == client_->jid().bare()) {
-    if (!has_peer(resource.c_str())) {
-      qDebug() << "Got presence from" << resource.c_str();
+    const gloox::RosterItem& item, const std::string& res,
+    gloox::Presence presence, const std::string&) {
+  // Ignore presence from anyone else
+  if (item.jid() != client_->jid().bare()) {
+    return;
+  }
+
+  QString resource = QString::fromUtf8(res.c_str());
+
+  switch (presence) {
+  case gloox::PresenceUnknown:
+  case gloox::PresenceUnavailable:
+    // The peer went offline - did we know about him?
+    qDebug() << "Peer unavailable" << resource;
+
+    for (int i=0 ; i<querying_peers_.count() ; ++i) {
+      if (querying_peers_[i].jid_resource_ == resource) {
+        querying_peers_.takeAt(i);
+        break;
+      }
+    }
+
+    for (int i=0 ; i<peers_.count() ; ++i) {
+      if (peers_[i].jid_resource_ == resource) {
+        emit parent_->PeerRemoved(peers_.takeAt(i));
+        break;
+      }
+    }
+    break;
+
+  default:
+    // The peer came online
+    if (!has_peer(resource)) {
+      qDebug() << "Got presence from" << resource;
 
       // This is a peer on our own bare JID, and we haven't seen it before
       gloox::JID full_jid(item.jid());
-      full_jid.setResource(resource);
+      full_jid.setResource(res);
 
       Peer peer;
-      peer.jid_resource_ = resource.c_str();
+      peer.jid_resource_ = resource;
       querying_peers_ << peer;
 
       client_->disco()->getDiscoInfo(full_jid, std::string(), this, 0);
@@ -360,12 +408,14 @@ void Connection::Private::handleDiscoInfoResult(gloox::Stanza* stanza, int conte
     return;
   }
 
-  qDebug() << "Got disco info from" << stanza->from().resource().c_str();
+  QString resource = QString::fromUtf8(stanza->from().resource().c_str());
+
+  qDebug() << "Got disco info from" << resource;
 
   // Are we currently querying this peer?
   int querying_peer_index = -1;
   for (int i=0 ; i<querying_peers_.count() ; ++i) {
-    if (querying_peers_[i].jid_resource_ == stanza->from().resource().c_str()) {
+    if (querying_peers_[i].jid_resource_ == resource) {
       querying_peer_index = i;
       break;
     }
@@ -395,8 +445,11 @@ void Connection::Private::handleDiscoInfoResult(gloox::Stanza* stanza, int conte
   // Fill in the list of capabilities.
   foreach (gloox::Tag* feature, features) {
     const std::string feature_name = feature->findAttribute("var");
-    if (feature_name == MediaPlayerHandler::kXmlNs) {
+    if (feature_name == kXmlnsXrmeMediaPlayer) {
       peer.caps_ |= Peer::MediaPlayer;
+    }
+    if (feature_name == kXmlnsXrmeRemoteControl) {
+      peer.caps_ |= Peer::RemoteControl;
     }
   }
 

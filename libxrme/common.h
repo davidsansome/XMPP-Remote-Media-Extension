@@ -15,7 +15,7 @@ struct Metadata {
   int track;
   int disc;
   int year;
-  quint64 length_nanosec;
+  int length_millisec;
   double rating; // range 0.0 - 1.0
 };
 
@@ -29,12 +29,16 @@ struct State {
   };
 
   PlaybackState playback_state;
-  quint64 position_nanosec;
+  int position_millisec;
   double volume; // range 0.0 - 1.0
   bool can_go_next;
   bool can_go_previous;
   bool can_seek;
   Metadata metadata;
 };
+
+extern const char* kXmlnsXrme;
+extern const char* kXmlnsXrmeMediaPlayer;
+extern const char* kXmlnsXrmeRemoteControl;
 
 #endif // XRME_COMMON_H

@@ -29,11 +29,13 @@ private slots:
   void NextClicked();
   void PreviousClicked();
   void RefreshClicked();
+  void UpdateStateClicked();
 
   // From Connection
   void Connected();
   void Disconnected();
   void PeerFound(const Connection::Peer& peer);
+  void PeerRemoved(const Connection::Peer& peer);
 
 private:
   Ui_ClientMainWindow* ui_;

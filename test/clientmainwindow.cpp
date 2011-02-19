@@ -9,6 +9,8 @@ ClientMainWindow::ClientMainWindow(QWidget* parent)
       connection_(new Connection(this))
 {
   ui_->setupUi(this);
+  QPushButton* update_state =
+      ui_->buttonBox->addButton("Update state", QDialogButtonBox::ResetRole);
 
   connect(ui_->connect, SIGNAL(clicked()), SLOT(Connect()));
   connect(ui_->playpause, SIGNAL(clicked()), SLOT(PlayPauseClicked()));
@@ -16,6 +18,7 @@ ClientMainWindow::ClientMainWindow(QWidget* parent)
   connect(ui_->previous, SIGNAL(clicked()), SLOT(PreviousClicked()));
   connect(ui_->next, SIGNAL(clicked()), SLOT(NextClicked()));
   connect(ui_->refresh, SIGNAL(clicked()), SLOT(RefreshClicked()));
+  connect(update_state, SIGNAL(clicked()), SLOT(UpdateStateClicked()));
 
   connection_->set_agent_name("Test client");
   connection_->SetRemoteControl(this);
@@ -23,6 +26,7 @@ ClientMainWindow::ClientMainWindow(QWidget* parent)
   connect(connection_, SIGNAL(Connected()), SLOT(Connected()));
   connect(connection_, SIGNAL(Disconnected()), SLOT(Disconnected()));
   connect(connection_, SIGNAL(PeerFound(Connection::Peer)), SLOT(PeerFound(Connection::Peer)));
+  connect(connection_, SIGNAL(PeerRemoved(Connection::Peer)), SLOT(PeerRemoved(Connection::Peer)));
 }
 
 ClientMainWindow::~ClientMainWindow() {
@@ -72,6 +76,12 @@ void ClientMainWindow::RefreshClicked() {
   connection_->RefreshPeers();
 }
 
+void ClientMainWindow::UpdateStateClicked() {
+  if (ui_->peers->currentIndex() != -1) {
+    QueryState(ui_->peers->itemData(ui_->peers->currentIndex()).toString());
+  }
+}
+
 void ClientMainWindow::Connected() {
   ui_->connect->setText("Disconnect");
   ui_->connect->setEnabled(true);
@@ -89,9 +99,28 @@ void ClientMainWindow::PeerFound(const Connection::Peer& peer) {
   ui_->peers->addItem(peer.agent_name_, peer.jid_resource_);
 }
 
+void ClientMainWindow::PeerRemoved(const Connection::Peer& peer) {
+  int index = ui_->peers->findData(peer.jid_resource_);
+  if (index != -1) {
+    ui_->peers->removeItem(index);
+  }
+}
+
 void ClientMainWindow::StateChanged(const QString& peer_jid_resource, const State& state) {
+  ui_->title->setText(state.metadata.title);
+  ui_->artist->setText(state.metadata.artist);
+  ui_->album->setText(state.metadata.album);
+  ui_->albumartist->setText(state.metadata.albumartist);
+  ui_->composer->setText(state.metadata.composer);
+  ui_->genre->setText(state.metadata.genre);
+  ui_->track->setText(QString::number(state.metadata.track));
+  ui_->disc->setText(QString::number(state.metadata.disc));
+  ui_->year->setText(QString::number(state.metadata.year));
+  ui_->length->setText(QString::number(state.metadata.length_millisec));
+  ui_->rating->setText(QString::number(state.metadata.rating));
 }
 
 void ClientMainWindow::AlbumArtChanged(const QString& peer_jid_resource, const QImage& art) {
+  ui_->art->setPixmap(QPixmap::fromImage(art));
 }
 
