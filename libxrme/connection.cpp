@@ -11,17 +11,13 @@
 #include <gloox/connectiontcpclient.h>
 #include <gloox/disco.h>
 #include <gloox/discohandler.h>
-#include <gloox/iqhandler.h>
 #include <gloox/loghandler.h>
-#include <gloox/messagehandler.h>
 #include <gloox/rosterlistener.h>
 #include <gloox/rostermanager.h>
 
 
 struct Connection::Private : public gloox::ConnectionListener,
-                             public gloox::MessageHandler,
                              public gloox::LogHandler,
-                             public gloox::IqHandler,
                              public gloox::RosterListener,
                              public gloox::DiscoHandler {
   Private(Connection* parent)
@@ -231,8 +227,6 @@ bool Connection::Connect() {
 
   // Add listeners
   d->client_->registerConnectionListener(d.data());
-  d->client_->registerMessageHandler(d.data());
-  d->client_->registerIqHandler(d.data(), kXmlnsXrme);
   d->client_->rosterManager()->registerRosterListener(d.data());
   d->client_->logInstance().registerLogHandler(
         gloox::LogLevelDebug, gloox::LogAreaAll, d.data());
@@ -253,6 +247,9 @@ bool Connection::Connect() {
   // Connect
   if (!d->client_->connect(false)) {
     d->client_.reset();
+    foreach (Handler* handler, d->handlers_) {
+      handler->Reset();
+    }
     return false;
   }
 
@@ -276,11 +273,6 @@ void Connection::SocketReadyReceive() {
 void Connection::Private::onConnect() {
   parent_->RefreshPeers();
   emit parent_->Connected();
-}
-
-void Connection::Private::handleMessage(gloox::Stanza* stanza,
-                                        gloox::MessageSession* session) {
-  qDebug() << Q_FUNC_INFO << stanza->xml().c_str();
 }
 
 void Connection::Private::onDisconnect(gloox::ConnectionError e) {
@@ -325,14 +317,6 @@ void Connection::RefreshPeers() {
   // Query presence
   qDebug() << "Sending presence query";
   d->client_->send(gloox::Stanza::createPresenceStanza(d->client_->jid().bareJID()));
-}
-
-bool Connection::Private::handleIq(gloox::Stanza* stanza) {
-  qDebug() << __PRETTY_FUNCTION__ << stanza->xml().c_str();
-}
-
-bool Connection::Private::handleIqID(gloox::Stanza* stanza, int context) {
-  qDebug() << __PRETTY_FUNCTION__ << context << stanza->xml().c_str();
 }
 
 Connection::Peer::Peer()
