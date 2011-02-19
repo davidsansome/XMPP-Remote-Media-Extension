@@ -1,6 +1,8 @@
 #ifndef LIBXRME_MEDIAPLAYERINTERFACE_H
 #define LIBXRME_MEDIAPLAYERINTERFACE_H
 
+#include "common.h"
+
 #include <QImage>
 #include <QScopedPointer>
 
@@ -11,30 +13,6 @@ public:
   MediaPlayerInterface();
   virtual ~MediaPlayerInterface();
 
-  enum PlaybackState {
-    PlaybackState_Stopped = 0,
-    PlaybackState_Playing = 1,
-    PlaybackState_Paused = 2,
-  };
-
-  struct Metadata {
-    Metadata();
-
-    QString title;
-    QString artist;
-    QString album;
-    QString albumartist;
-    QString composer;
-    QString genre;
-    int track;
-    int disc;
-    int year;
-    quint64 length_nanosec;
-    double rating; // range 0.0 - 1.0
-
-    QImage art;
-  };
-
   // Control playback
   virtual void PlayPause() = 0;
   virtual void Stop() = 0;
@@ -42,17 +20,18 @@ public:
   virtual void Previous() = 0;
 
   // Query the current state of the player.  StateChanged() should be called
-  // when any of these values change.
-  virtual PlaybackState playback_state() const = 0;
-  virtual double volume() const = 0; // range 0.0 - 1.0
-  virtual bool can_go_next() const = 0;
-  virtual bool can_go_previous() const = 0;
-  virtual bool can_seek() const = 0;
-  virtual Metadata metadata() const = 0;
+  // when any part of the state changes.
+  virtual State state() const = 0;
 
-protected:
-  // Call this when the value of any of the above getter methods have changed.
+  // Query the album art of the currently playing song.  This is separate from
+  // state() because it is bigger and needs to be sent less often.
+  // AlbumArtChanged() should be called when this changes.  Return a null
+  // QImage() if there is no song playing or the song has no album art.
+  virtual QImage album_art() const = 0;
+
+  // Call when the values returned from the above getters have changed.
   virtual void StateChanged();
+  virtual void AlbumArtChanged();
 
 private:
   Q_DISABLE_COPY(MediaPlayerInterface);

@@ -7,6 +7,7 @@
 #include <QString>
 
 class MediaPlayerInterface;
+class RemoteControlInterface;
 
 class Connection : public QObject {
   Q_OBJECT
@@ -64,8 +65,18 @@ public:
   // MediaPlayerInterface MUST stay alive for as long as the connection.
   void SetMediaPlayer(MediaPlayerInterface* interface);
 
-  // Returns the user's actual JID.  This is only valid after Connected() is
-  // emitted.  Before the connection is complete it will return a null QString.
+  // Sets a remote control on the connection.  Calling this means the XRME agent
+  // will advertise itself as a remote control, and will receive state changes
+  // from media player agents.  Should be called before calling Connect().  The
+  // Connection will NOT take ownership of the RemoteControlInterface, and the
+  // RemoteControlInterface MUST stay alive for as long as the connection.
+  void SetRemoteControl(RemoteControlInterface* interface);
+
+  // Returns true after Connected() is emitted.
+  bool is_connected() const;
+
+  // Returns the user's actual JID.  This is only valid if is_connected() is
+  // true.  Before the connection is complete it will return a null QString.
   QString jid() const;
 
 public slots:
@@ -86,7 +97,7 @@ signals:
   void Connected();
   void Disconnected();
 
-  void PeerFound(const Peer& peer);
+  void PeerFound(const Connection::Peer& peer);
 
 private slots:
   void SocketReadyReceive();

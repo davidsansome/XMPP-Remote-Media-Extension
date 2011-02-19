@@ -1,5 +1,6 @@
 #include "connection.h"
 #include "mediaplayerhandler.h"
+#include "remotecontrolhandler.h"
 
 #include <QSocketNotifier>
 #include <QtDebug>
@@ -29,6 +30,7 @@ struct Connection::Private : public gloox::ConnectionListener,
       jid_host_(kDefaultJIDHost),
       verbose_(false),
       media_player_(NULL),
+      remote_control_(NULL),
       next_id_(1) {}
 
   static const char* kDefaultServer;
@@ -49,6 +51,7 @@ struct Connection::Private : public gloox::ConnectionListener,
 
   // Interfaces
   MediaPlayerInterface* media_player_;
+  RemoteControlInterface* remote_control_;
   QList<Handler*> handlers_;
 
   // Stuff that is valid when we're connected.
@@ -157,12 +160,32 @@ void Connection::SetMediaPlayer(MediaPlayerInterface* interface) {
   d->handlers_ << new MediaPlayerHandler(interface);
 }
 
+void Connection::SetRemoteControl(RemoteControlInterface* interface) {
+  if (d->media_player_) {
+    qWarning() << "Connection::RemoteControlInterface: this connection already"
+                  " has a RemoteControlInterface set";
+    return;
+  }
+
+  if (!interface) {
+    qWarning() << "Connection::SetRemoteControl called with NULL interface";
+    return;
+  }
+
+  d->remote_control_ = interface;
+  d->handlers_ << new RemoteControlHandler(interface);
+}
+
 void Connection::set_verbose(bool verbose) {
   d->verbose_ = verbose;
 }
 
+bool Connection::is_connected() const {
+  return (d->client_ && d->client_->state() == gloox::StateConnected);
+}
+
 QString Connection::jid() const {
-  if (d->client_ && d->client_->state() == gloox::StateConnected) {
+  if (is_connected()) {
     return QString::fromUtf8(d->client_->jid().full().c_str());
   }
   return QString();
@@ -245,6 +268,10 @@ void Connection::Private::handleMessage(gloox::Stanza* stanza,
 }
 
 void Connection::Private::onDisconnect(gloox::ConnectionError e) {
+  foreach (Handler* handler, handlers_) {
+    handler->Reset();
+  }
+
   socket_notifier_->setEnabled(false);
   socket_notifier_.reset();
   client_.reset();
@@ -277,6 +304,7 @@ void Connection::RefreshPeers() {
   d->querying_peers_.clear();
 
   // Query presence
+  qDebug() << "Sending presence query";
   d->client_->send(gloox::Stanza::createPresenceStanza(d->client_->jid().bareJID()));
 }
 
@@ -297,6 +325,8 @@ void Connection::Private::handleRosterPresence(
     gloox::Presence presence, const std::string& msg) {
   if (item.jid() == client_->jid().bare()) {
     if (!has_peer(resource.c_str())) {
+      qDebug() << "Got presence from" << resource.c_str();
+
       // This is a peer on our own bare JID, and we haven't seen it before
       gloox::JID full_jid(item.jid());
       full_jid.setResource(resource);
@@ -329,6 +359,8 @@ void Connection::Private::handleDiscoInfoResult(gloox::Stanza* stanza, int conte
   if (stanza->from().bareJID() != client_->jid().bareJID()) {
     return;
   }
+
+  qDebug() << "Got disco info from" << stanza->from().resource().c_str();
 
   // Are we currently querying this peer?
   int querying_peer_index = -1;

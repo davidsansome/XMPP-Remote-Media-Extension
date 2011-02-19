@@ -12,20 +12,25 @@ public:
   void Next() { qDebug() << __PRETTY_FUNCTION__; }
   void Previous() { qDebug() << __PRETTY_FUNCTION__; }
 
-  PlaybackState playback_state() const { return PlaybackState_Playing; }
-  double volume() const { return 0.5; }
-  bool can_go_next() const { return true; }
-  bool can_go_previous() const { return true; }
-  bool can_seek() const { return true; }
-  Metadata metadata() const {
-    Metadata ret;
-    ret.title = "Penis Song";
-    ret.artist = "Monty Python";
-    ret.album = "Monty Python Sings";
-    ret.track = 4;
-    ret.length_nanosec = 42000000000;
-    ret.rating = 1.0;
+  State state() const {
+    State ret;
+    ret.playback_state = State::PlaybackState_Playing;
+    ret.position_nanosec = 0;
+    ret.volume = 0.5;
+    ret.can_go_next = true;
+    ret.can_go_previous = true;
+    ret.can_seek = true;
+    ret.metadata.title = "Penis Song";
+    ret.metadata.artist = "Monty Python";
+    ret.metadata.album = "Monty Python Sings";
+    ret.metadata.track = 4;
+    ret.metadata.length_nanosec = 42000000000;
+    ret.metadata.rating = 1.0;
     return ret;
+  }
+
+  QImage album_art() const {
+    return QImage();
   }
 };
 

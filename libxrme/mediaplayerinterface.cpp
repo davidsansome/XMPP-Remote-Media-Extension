@@ -18,22 +18,20 @@ MediaPlayerInterface::MediaPlayerInterface()
 MediaPlayerInterface::~MediaPlayerInterface() {
 }
 
-MediaPlayerInterface::Metadata::Metadata()
-    : track(0),
-      disc(0),
-      year(0),
-      length_nanosec(0),
-      rating(0.0) {
-}
-
 void MediaPlayerInterface::StateChanged() {
   if (!d->handler_) {
-    qWarning() << "MediaPlayerInterface: You must add this interface to a"
-                  " Connection before calling StateChanged()";
     return;
   }
 
   d->handler_->StateChanged();
+}
+
+void MediaPlayerInterface::AlbumArtChanged() {
+  if (!d->handler_) {
+    return;
+  }
+
+  d->handler_->AlbumArtChanged();
 }
 
 void MediaPlayerInterface::Attach(MediaPlayerHandler* handler) {

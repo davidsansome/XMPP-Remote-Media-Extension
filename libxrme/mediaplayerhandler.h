@@ -15,13 +15,14 @@ public:
   static const char* kXmlNs;
 
   void StateChanged();
+  void AlbumArtChanged();
 
   // Handler
   void Init(gloox::Client* client);
 
   // gloox::IqHandler
   bool handleIq(gloox::Stanza* stanza);
-  bool handleIqID(gloox::Stanza* stanza, int context);
+  bool handleIqID(gloox::Stanza*, int) {}
 
 private:
   MediaPlayerInterface* interface_;

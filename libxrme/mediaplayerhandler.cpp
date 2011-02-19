@@ -17,17 +17,37 @@ void MediaPlayerHandler::StateChanged() {
   qDebug() << __PRETTY_FUNCTION__;
 }
 
+void MediaPlayerHandler::AlbumArtChanged() {
+  qDebug() << __PRETTY_FUNCTION__;
+}
+
 void MediaPlayerHandler::Init(gloox::Client* client) {
+  Handler::Init(client);
+
   client->registerIqHandler(this, kXmlNs);
   client->disco()->addFeature(kXmlNs);
 }
 
 bool MediaPlayerHandler::handleIq(gloox::Stanza* stanza) {
-  qDebug() << __PRETTY_FUNCTION__ << stanza->xml().c_str();
-  return true;
-}
+  gloox::Tag* query = stanza->findChild("query");
+  if (!query) {
+    return false;
+  }
 
-bool MediaPlayerHandler::handleIqID(gloox::Stanza* stanza, int context) {
-  qDebug() << __PRETTY_FUNCTION__ << stanza->xml().c_str();
+  if (stanza->hasChild("playpause")) {
+    interface_->PlayPause();
+  } else if (stanza->hasChild("stop")) {
+    interface_->Stop();
+  } else if (stanza->hasChild("previous")) {
+    interface_->Previous();
+  } else if (stanza->hasChild("next")) {
+    interface_->Next();
+  } else {
+    qWarning() << "Unknown command received from"
+               << stanza->from().resource().c_str()
+               << stanza->xml().c_str();
+    return false;
+  }
+
   return true;
 }
