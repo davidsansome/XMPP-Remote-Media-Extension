@@ -4,6 +4,8 @@ link_directories(${GLOOX_LIBRARY_DIRS})
 
 set(SOURCES
   connection.cpp
+  mediaplayerhandler.cpp
+  mediaplayerinterface.cpp
 )
 
 set(HEADERS

@@ -1,8 +1,9 @@
 include_directories(${CMAKE_SOURCE_DIR}/libxrme)
 
-set(SOURCES
-  main.cpp
-)
+add_executable(testserver server.cpp)
+target_link_libraries(testserver xmre)
 
-add_executable(test ${SOURCES})
-target_link_libraries(test xmre)
+
+qt4_wrap_cpp(CLIENTMOC client.h)
+add_executable(testclient client.cpp ${CLIENTMOC})
+target_link_libraries(testclient xmre)
