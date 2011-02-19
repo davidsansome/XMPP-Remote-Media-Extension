@@ -1,5 +1,5 @@
-#ifndef LIBXMRE_CONNECTION_H
-#define LIBXMRE_CONNECTION_H
+#ifndef LIBXRME_CONNECTION_H
+#define LIBXRME_CONNECTION_H
 
 #include <QObject>
 #include <QPair>
@@ -46,7 +46,7 @@ public:
   // "talk.google.com".
   void set_server(const QString& server);
 
-  // Sets the resource string to use in the JID.  Defaults to "xmreagent".
+  // Sets the resource string to use in the JID.  Defaults to "xrmeagent".
   void set_jid_resource(const QString& resource);
 
   // Sets the host part to append to the JID if the user didn't specify one in
@@ -57,7 +57,7 @@ public:
   // If this is set then detailed XMPP output will be printed.  Defaults to off.
   void set_verbose(bool verbose);
 
-  // Sets a media player on the connection.  Calling this means the XMRE agent
+  // Sets a media player on the connection.  Calling this means the XRME agent
   // will advertise itself as a media player, and will be able to controlled by
   // remote control agents.  Should be called before calling Connect().  The
   // Connection will NOT take ownership of the MediaPlayerInterface, and the

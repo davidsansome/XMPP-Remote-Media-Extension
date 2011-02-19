@@ -103,7 +103,7 @@ struct Connection::Private : public gloox::ConnectionListener,
 };
 
 const char* Connection::Private::kDefaultServer = "talk.google.com";
-const char* Connection::Private::kDefaultJIDResource = "xmreagent";
+const char* Connection::Private::kDefaultJIDResource = "xrmeagent";
 const char* Connection::Private::kDefaultJIDHost = "gmail.com";
 const char* Connection::Private::kXmlNs = "http://purplehatstands.com/xmlns/xrme";
 

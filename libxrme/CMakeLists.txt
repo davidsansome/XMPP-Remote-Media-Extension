@@ -14,8 +14,8 @@ set(HEADERS
 
 qt4_wrap_cpp(MOC ${HEADERS})
 
-add_library(xmre ${SOURCES} ${MOC})
-target_link_libraries(xmre
+add_library(xrme ${SOURCES} ${MOC})
+target_link_libraries(xrme
   ${QT_LIBRARIES}
   ${GLOOX_LIBRARIES}
 )
