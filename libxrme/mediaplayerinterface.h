@@ -18,7 +18,7 @@
 #ifndef LIBXRME_MEDIAPLAYERINTERFACE_H
 #define LIBXRME_MEDIAPLAYERINTERFACE_H
 
-#include "common.h"
+#include <xrme/common.h>
 
 #include <QImage>
 #include <QScopedPointer>

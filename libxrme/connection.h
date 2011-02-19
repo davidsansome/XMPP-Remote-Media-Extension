@@ -78,6 +78,15 @@ public:
   // If this is set then detailed XMPP output will be printed.  Defaults to off.
   void set_verbose(bool verbose);
 
+  // The following getters just return the data set above.
+  QString username() const;
+  QString password() const;
+  QString agent_name() const;
+  QString server() const;
+  QString jid_resource() const;
+  QString jid_host() const;
+  bool is_verbose() const;
+
   // Sets a media player on the connection.  Calling this means the XRME agent
   // will advertise itself as a media player, and will be able to controlled by
   // remote control agents.  Should be called before calling Connect().  The

@@ -134,29 +134,21 @@ Connection::~Connection() {
   qDeleteAll(d->handlers_);
 }
 
-void Connection::set_username(const QString& username) {
-  d->username_ = username;
-}
+void Connection::set_username(const QString& username) { d->username_ = username; }
+void Connection::set_password(const QString& password) { d->password_ = password; }
+void Connection::set_agent_name(const QString& agent_name) { d->agent_name_ = agent_name; }
+void Connection::set_server(const QString& server) { d->server_ = server; }
+void Connection::set_jid_resource(const QString& resource) { d->jid_resource_ = resource; }
+void Connection::set_jid_host(const QString& host) { d->jid_host_ = host; }
+void Connection::set_verbose(bool verbose) { d->verbose_ = verbose; }
 
-void Connection::set_password(const QString& password) {
-  d->password_ = password;
-}
-
-void Connection::set_agent_name(const QString& agent_name) {
-  d->agent_name_ = agent_name;
-}
-
-void Connection::set_server(const QString& server) {
-  d->server_ = server;
-}
-
-void Connection::set_jid_resource(const QString& resource) {
-  d->jid_resource_ = resource;
-}
-
-void Connection::set_jid_host(const QString& host) {
-  d->jid_host_ = host;
-}
+QString Connection::username() const { return d->username_; }
+QString Connection::password() const { return d->password_; }
+QString Connection::agent_name() const { return d->agent_name_; }
+QString Connection::server() const { return d->server_; }
+QString Connection::jid_resource() const { return d->jid_resource_; }
+QString Connection::jid_host() const { return d->jid_host_; }
+bool Connection::is_verbose() const { return d->verbose_; }
 
 void Connection::SetMediaPlayer(MediaPlayerInterface* interface) {
   if (d->media_player_) {
@@ -188,10 +180,6 @@ void Connection::SetRemoteControl(RemoteControlInterface* interface) {
 
   d->remote_control_ = interface;
   d->handlers_ << new RemoteControlHandler(interface);
-}
-
-void Connection::set_verbose(bool verbose) {
-  d->verbose_ = verbose;
 }
 
 bool Connection::is_connected() const {

@@ -1,3 +1,4 @@
+include_directories(${CMAKE_BINARY_DIR})
 include_directories(${GLOOX_INCLUDE_DIRS})
 
 link_directories(${GLOOX_LIBRARY_DIRS})
@@ -18,6 +19,7 @@ set(HEADERS
 
 SET(PUBLIC_HEADERS
   connection.h
+  common.h
   mediaplayerinterface.h
   remotecontrolinterface.h
 )
