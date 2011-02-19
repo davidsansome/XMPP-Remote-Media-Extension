@@ -440,7 +440,7 @@ void Connection::Private::handleDiscoInfoResult(gloox::Stanza* stanza, int conte
   }
 
   // Fill in the name.
-  peer.agent_name_ = identity->findAttribute("name").c_str();
+  peer.agent_name_ = QString::fromUtf8(identity->findAttribute("name").c_str());
 
   // Fill in the list of capabilities.
   foreach (gloox::Tag* feature, features) {
@@ -465,9 +465,11 @@ void Connection::Private::handleDiscoInfoResult(gloox::Stanza* stanza, int conte
 }
 
 void Connection::Private::handleDiscoError(gloox::Stanza* stanza, int context) {
+  QString resource = QString::fromUtf8(stanza->from().resource().c_str());
+
   // Remove this peer if we're currently querying it
   for (int i=0 ; i<querying_peers_.count() ; ++i) {
-    if (querying_peers_[i].jid_resource_ == stanza->from().resource().c_str()) {
+    if (querying_peers_[i].jid_resource_ == resource) {
       querying_peers_.removeAt(i);
       return;
     }
