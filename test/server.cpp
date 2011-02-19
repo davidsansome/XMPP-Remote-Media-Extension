@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
   c.set_username(a.arguments()[1]);
   c.set_password(a.arguments()[2]);
   c.set_agent_name("Test server");
-  c.set_verbose(true);
+  //c.set_verbose(true);
 
   MediaPlayer player;
   c.SetMediaPlayer(&player);

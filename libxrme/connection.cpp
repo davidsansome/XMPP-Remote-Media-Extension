@@ -4,6 +4,7 @@
 #include "remotecontrolhandler.h"
 
 #include <QSocketNotifier>
+#include <QTimer>
 #include <QtDebug>
 
 #include <gloox/client.h>
@@ -28,7 +29,7 @@ struct Connection::Private : public gloox::ConnectionListener,
       verbose_(false),
       media_player_(NULL),
       remote_control_(NULL),
-      next_id_(1) {}
+      spontaneous_disconnect_(true) {}
 
   static const char* kDefaultServer;
   static const char* kDefaultJIDResource;
@@ -61,9 +62,9 @@ struct Connection::Private : public gloox::ConnectionListener,
 
   bool has_peer(const QString& jid_resource) const;
 
-  // Numeric ID -> XMPP ID mappings
-  int next_id_;
-  QMap<QString, int> id_map_;
+  // We can't destroy the client_ in the onDisconnect() handler, so we have to
+  // do it with a QTimer if we get a spontaneous disconnect.
+  bool spontaneous_disconnect_;
 
   // gloox::MessageHandler
   void handleMessage(gloox::Stanza* stanza, gloox::MessageSession* session = 0);
@@ -263,7 +264,12 @@ bool Connection::Connect() {
 }
 
 void Connection::Disconnect() {
-
+  if (is_connected()) {
+    d->spontaneous_disconnect_ = false;
+    d->client_->disconnect();
+    d->client_.reset();
+    d->spontaneous_disconnect_ = true;
+  }
 }
 
 void Connection::SocketReadyReceive() {
@@ -276,17 +282,40 @@ void Connection::Private::onConnect() {
 }
 
 void Connection::Private::onDisconnect(gloox::ConnectionError e) {
+  QString error_text;
+  switch (e) {
+    case gloox::ConnNoError:
+    case gloox::ConnUserDisconnected:
+      break;
+    case gloox::ConnStreamError:
+      error_text = QString::fromUtf8(client_->streamErrorText().c_str());
+      break;
+    case gloox::ConnAuthenticationFailed:
+      error_text = QString("Authentication error (%1)").arg(client_->authError());
+      break;
+    default:
+      error_text = QString("Unknown error (%1)").arg(e);
+      break;
+  }
+
   foreach (Handler* handler, handlers_) {
     handler->Reset();
   }
 
   socket_notifier_->setEnabled(false);
   socket_notifier_.reset();
-  client_.reset();
   peers_.clear();
   querying_peers_.clear();
 
-  emit parent_->Disconnected();
+  emit parent_->Disconnected(error_text);
+
+  if (spontaneous_disconnect_) {
+    QTimer::singleShot(0, parent_, SLOT(CleanupClient()));
+  }
+}
+
+void Connection::CleanupClient() {
+  d->client_.reset();
 }
 
 bool Connection::Private::onTLSConnect(const gloox::CertInfo& info) {

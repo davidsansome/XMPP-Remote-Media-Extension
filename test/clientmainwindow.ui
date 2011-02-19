@@ -152,6 +152,9 @@
    </item>
    <item>
     <widget class="QGroupBox" name="current_track_group">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="styleSheet">
       <string notr="true">QLineEdit { background-color: transparent; }</string>
      </property>

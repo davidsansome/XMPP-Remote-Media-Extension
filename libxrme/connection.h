@@ -104,13 +104,14 @@ public slots:
 
 signals:
   void Connected();
-  void Disconnected();
+  void Disconnected(const QString& error);
 
   void PeerFound(const Connection::Peer& peer);
   void PeerRemoved(const Connection::Peer& peer);
 
 private slots:
   void SocketReadyReceive();
+  void CleanupClient();
 
 private:
   struct Private;

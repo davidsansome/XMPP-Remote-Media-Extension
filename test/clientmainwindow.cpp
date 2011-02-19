@@ -3,6 +3,8 @@
 
 #include "connection.h"
 
+#include <QMessageBox>
+
 ClientMainWindow::ClientMainWindow(QWidget* parent)
     : QDialog(parent),
       ui_(new Ui_ClientMainWindow),
@@ -24,7 +26,7 @@ ClientMainWindow::ClientMainWindow(QWidget* parent)
   connection_->SetRemoteControl(this);
 
   connect(connection_, SIGNAL(Connected()), SLOT(Connected()));
-  connect(connection_, SIGNAL(Disconnected()), SLOT(Disconnected()));
+  connect(connection_, SIGNAL(Disconnected(QString)), SLOT(Disconnected(QString)));
   connect(connection_, SIGNAL(PeerFound(Connection::Peer)), SLOT(PeerFound(Connection::Peer)));
   connect(connection_, SIGNAL(PeerRemoved(Connection::Peer)), SLOT(PeerRemoved(Connection::Peer)));
 }
@@ -86,13 +88,19 @@ void ClientMainWindow::Connected() {
   ui_->connect->setText("Disconnect");
   ui_->connect->setEnabled(true);
   ui_->remote_group->setEnabled(true);
+  ui_->current_track_group->setEnabled(true);
   ui_->peers->clear();
 }
 
-void ClientMainWindow::Disconnected() {
+void ClientMainWindow::Disconnected(const QString& error) {
   ui_->connect->setText("Connect");
   ui_->connect->setEnabled(true);
   ui_->remote_group->setEnabled(false);
+  ui_->current_track_group->setEnabled(false);
+
+  if (!error.isNull()) {
+    QMessageBox::warning(this, "Disconnected", error);
+  }
 }
 
 void ClientMainWindow::PeerFound(const Connection::Peer& peer) {
