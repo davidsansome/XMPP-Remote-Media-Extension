@@ -18,8 +18,8 @@
 #ifndef CLIENTMAINWINDOW_H
 #define CLIENTMAINWINDOW_H
 
-#include "connection.h"
-#include "remotecontrolinterface.h"
+#include <xrme/connection.h>
+#include <xrme/remotecontrolinterface.h>
 
 #include <QDialog>
 

@@ -1,4 +1,4 @@
-include_directories(${CMAKE_SOURCE_DIR}/libxrme)
+include_directories(${CMAKE_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(testserver server.cpp)

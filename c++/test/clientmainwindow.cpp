@@ -18,7 +18,7 @@
 #include "clientmainwindow.h"
 #include "ui_clientmainwindow.h"
 
-#include "connection.h"
+#include <xrme/connection.h>
 
 #include <QMessageBox>
 
