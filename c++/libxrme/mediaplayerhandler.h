@@ -40,8 +40,8 @@ public:
   void Init(Connection* connection, gloox::Client* client);
 
   // gloox::IqHandler
-  bool handleIq(gloox::Stanza* stanza);
-  bool handleIqID(gloox::Stanza*, int) {}
+  bool handleIq(const gloox::IQ& stanza);
+  void handleIqID(const gloox::IQ&, int) {}
 
 private:
   MediaPlayerInterface* interface_;

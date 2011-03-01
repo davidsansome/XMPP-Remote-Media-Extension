@@ -60,6 +60,7 @@ void ClientMainWindow::Connect() {
   } else {
     connection_->set_username(ui_->username->text());
     connection_->set_password(ui_->password->text());
+    connection_->set_verbose(true);
     if (!connection_->Connect()) {
       ui_->connect->setEnabled(true);
     }
@@ -148,4 +149,3 @@ void ClientMainWindow::StateChanged(const QString& peer_jid_resource, const xrme
 void ClientMainWindow::AlbumArtChanged(const QString& peer_jid_resource, const QImage& art) {
   ui_->art->setPixmap(QPixmap::fromImage(art));
 }
-
