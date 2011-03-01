@@ -49,8 +49,8 @@ struct Connection::Private : public gloox::ConnectionListener,
       media_player_(NULL),
       remote_control_(NULL),
       spontaneous_disconnect_(true),
-      media_player_extension_(new XRMEExtension(XRMEExtension::MediaPlayer)),
-      remote_control_extension_(new XRMEExtension(XRMEExtension::RemoteControl)) {}
+      media_player_extension_(new MediaPlayerExtension()),
+      remote_control_extension_(new RemoteControlExtension()) {}
 
   static const char* kDefaultServer;
   static const char* kDefaultJIDResource;
@@ -76,8 +76,8 @@ struct Connection::Private : public gloox::ConnectionListener,
   QScopedPointer<gloox::Client> client_;
   QScopedPointer<QSocketNotifier> socket_notifier_;
 
-  XRMEExtension* media_player_extension_;
-  XRMEExtension* remote_control_extension_;
+  MediaPlayerExtension* media_player_extension_;
+  RemoteControlExtension* remote_control_extension_;
 
   // After discovering a peer we query it to find its capabilities.  Only after
   // it replies to the query do we put it in peers_ and emit PeerFound().

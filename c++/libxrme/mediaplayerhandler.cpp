@@ -124,7 +124,7 @@ void MediaPlayerHandler::Init(Connection* connection, gloox::Client* client) {
   Handler::Init(connection, client);
 
   client->registerIqHandler(
-      this, XRMEExtension::kExtensionType + XRMEExtension::MediaPlayer);
+      this, MediaPlayerExtension::kExtensionType);
   client->disco()->addFeature(kXmlnsXrmeMediaPlayer);
 }
 

@@ -37,7 +37,7 @@ void RemoteControlHandler::Init(Connection* connection, gloox::Client* client) {
   Handler::Init(connection, client);
 
   client->registerIqHandler(
-      this, XRMEExtension::kExtensionType + XRMEExtension::RemoteControl);
+      this, RemoteControlExtension::kExtensionType);
   client->disco()->addFeature(kXmlnsXrmeRemoteControl);
 }
 
