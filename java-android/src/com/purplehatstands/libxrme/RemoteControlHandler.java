@@ -79,8 +79,9 @@ public class RemoteControlHandler extends Handler {
   }
 
   public void QueryState(String peer_jid_resource) {
-    // TODO Auto-generated method stub
-    
+    Packet iqPacket = new RemoteControlPacket("querystate");
+    iqPacket.setTo(peer_jid_resource);
+    client_.sendPacket(iqPacket);
   }
 
   private RemoteControlInterface iface_;

@@ -30,7 +30,7 @@ public abstract class RemoteControlInterface {
     }
   }
   
-  protected void QueryState(String peer_jid_resource) {
+  public void QueryState(String peer_jid_resource) {
     if (handler_ != null) {
       handler_.QueryState(peer_jid_resource);
     }
