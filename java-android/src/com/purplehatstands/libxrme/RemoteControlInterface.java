@@ -18,7 +18,7 @@ public abstract class RemoteControlInterface {
     }
   }
   
-  protected void Next(String peer_jid_resource) {
+  public void Next(String peer_jid_resource) {
     if (handler_ != null) {
       handler_.Next(peer_jid_resource);
     }

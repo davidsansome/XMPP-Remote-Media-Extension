@@ -1,16 +1,12 @@
 package com.purplehatstands.libxrme;
 
-import java.util.List;
-
 import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.filter.PacketTypeFilter;
 import org.jivesoftware.smack.packet.IQ;
 import org.jivesoftware.smack.packet.Packet;
-import org.jivesoftware.smack.packet.XMPPError;
-import org.jivesoftware.smackx.NodeInformationProvider;
+import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
-import org.jivesoftware.smackx.packet.DiscoverInfo;
 
 public class RemoteControlHandler extends Handler {
   public RemoteControlHandler(RemoteControlInterface remote_control) {
@@ -66,8 +62,9 @@ public class RemoteControlHandler extends Handler {
   }
 
   public void Next(String peer_jid_resource) {
-    // TODO Auto-generated method stub
-    
+    Packet iqPacket = new RemoteControlPacket("next");
+    iqPacket.setTo(peer_jid_resource);
+    client_.sendPacket(iqPacket);
   }
 
   public void Previous(String peer_jid_resource) {
@@ -81,4 +78,20 @@ public class RemoteControlHandler extends Handler {
   }
 
   private RemoteControlInterface iface_;
+  
+  private class RemoteControlPacket extends IQ {
+    private final String command_;
+    RemoteControlPacket(String command) {
+      command_ = command;
+      setType(IQ.Type.SET);
+    }
+    
+    @Override
+    public String getChildElementXML() {
+      return "<xrme xmlns=\"" + Common.XMLNS_XRME_MEDIAPLAYER + "\">" +
+          "<" + command_ + "/></xrme>";
+      
+    }
+    
+  }
 }

@@ -15,6 +15,7 @@ public class State extends IQ {
   public boolean can_go_next = false;
   public boolean can_go_previous = false;
   public boolean can_seek = false;
+  public int length_millisec = 0;
   public Metadata metadata = new Metadata();
   
   
@@ -39,6 +40,8 @@ public class State extends IQ {
           ret.can_go_previous = Integer.parseInt(value) == 0 ? false : true;
         } else if (name.equals("can_seek")) {
           ret.can_seek = Integer.parseInt(value) == 0 ? false : true;
+        } else if (name.equals("length_millisec")) {
+          ret.length_millisec = Integer.parseInt(value);
         }
       }
       

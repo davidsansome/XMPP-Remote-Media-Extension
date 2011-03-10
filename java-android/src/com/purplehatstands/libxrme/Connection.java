@@ -5,15 +5,21 @@ import java.util.Collection;
 import java.util.List;
 
 import org.jivesoftware.smack.ConnectionConfiguration;
+import org.jivesoftware.smack.PacketListener;
 import org.jivesoftware.smack.Roster;
+import org.jivesoftware.smack.RosterEntry;
 import org.jivesoftware.smack.RosterListener;
 import org.jivesoftware.smack.XMPPConnection;
 import org.jivesoftware.smack.XMPPException;
+import org.jivesoftware.smack.filter.PacketTypeFilter;
+import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.provider.ProviderManager;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 import org.jivesoftware.smackx.packet.DiscoverInfo;
 import org.jivesoftware.smackx.packet.DiscoverItems;
+import org.jivesoftware.smackx.provider.DiscoverInfoProvider;
+import org.jivesoftware.smackx.provider.DiscoverItemsProvider;
 
 import android.util.Log;
 
@@ -119,6 +125,10 @@ public final class Connection {
     handlers_.add(new RemoteControlHandler(remote_control_));
   }
   
+  public void SetPeerDiscoveryInterface(PeerDiscoveryInterface iface) {
+    peer_discovery_ = iface;
+  }
+  
   public void Connect() throws XMPPException {
     if (username_ == null || username_.length() == 0 ||
         password_ == null || password_.length() == 0 ||
@@ -132,8 +142,8 @@ public final class Connection {
     xmpp_ = new XMPPConnection(config);
     
     // Set providers.  Maybe this should be done statically?
-    ProviderManager.getInstance().addIQProvider("query", "http://jabber.org/protocol/disco#items", DiscoverItems.class);
-    ProviderManager.getInstance().addIQProvider("query", "http://jabber.org/protocol/disco#info", DiscoverInfo.class);
+    ProviderManager.getInstance().addIQProvider("query", "http://jabber.org/protocol/disco#items", new DiscoverItemsProvider());
+    ProviderManager.getInstance().addIQProvider("query", "http://jabber.org/protocol/disco#info", new DiscoverInfoProvider());
     ProviderManager.getInstance().addIQProvider("state", Common.XMLNS_XRME_REMOTECONTROL, new State.Parser());
     ProviderManager.getInstance().addIQProvider("album_art", Common.XMLNS_XRME_REMOTECONTROL, new AlbumArt.Parser());
     
@@ -144,10 +154,11 @@ public final class Connection {
     // Set discovery information
     ServiceDiscoveryManager.setIdentityName(agent_name_);
     ServiceDiscoveryManager.setIdentityType("bot");
-    ServiceDiscoveryManager disco_manager = ServiceDiscoveryManager.getInstanceFor(xmpp_);
-    if (disco_manager == null) {
-      disco_manager = new ServiceDiscoveryManager(xmpp_);
+    if (ServiceDiscoveryManager.getInstanceFor(xmpp_) == null) {
+      new ServiceDiscoveryManager(xmpp_);
     }
+    
+    final ServiceDiscoveryManager disco_manager = ServiceDiscoveryManager.getInstanceFor(xmpp_);
     disco_manager.addFeature(Common.XMLNS_XRME);
     
     // Add a roster listener
@@ -157,10 +168,38 @@ public final class Connection {
       public void entriesDeleted(Collection<String> addresses) {}
       public void entriesUpdated(Collection<String> addresses) {}
       public void entriesAdded(Collection<String> addresses) {}
+
       public void presenceChanged(Presence presence) {
         Log.i(TAG, "Presence changed: " + presence.getFrom() + " " + presence);
       }
     });
+    
+    final String full_jid = xmpp_.getUser();
+    final String bare_jid = full_jid.split("/")[0];
+    
+    Log.d(TAG, full_jid);
+    Log.d(TAG, bare_jid);
+    
+    xmpp_.addPacketListener(new PacketListener() {
+      
+      public void processPacket(Packet packet) {
+        Presence presence = (Presence)packet;
+        Log.d(TAG, "Received presence from: " + presence.getFrom());
+        String bare_from = presence.getFrom().split("/")[0];
+        if (bare_from.equals(bare_jid)) {
+          try {
+            DiscoverInfo disco = disco_manager.discoverInfo(presence.getFrom());
+            Log.d(TAG, "Got disco for: " + presence.getFrom() + " Supports XRME: " + disco.containsFeature(Common.XMLNS_XRME));
+            if (peer_discovery_ != null) {
+              peer_discovery_.PeerFound(presence.getFrom());
+            }
+          } catch (XMPPException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+          }
+        }
+      }
+    }, new PacketTypeFilter(Presence.class));
     
     // Initialise the handlers
     for (Handler handler : handlers_) {
@@ -186,6 +225,7 @@ public final class Connection {
   private MediaPlayerInterface media_player_;
   private RemoteControlInterface remote_control_;
   private List<Handler> handlers_ = new ArrayList<Handler>();
+  private PeerDiscoveryInterface peer_discovery_ = null;
 
   private XMPPConnection xmpp_;
 }
