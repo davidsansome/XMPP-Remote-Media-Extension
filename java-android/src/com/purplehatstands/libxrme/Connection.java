@@ -190,8 +190,8 @@ public final class Connection {
           try {
             DiscoverInfo disco = disco_manager.discoverInfo(presence.getFrom());
             Log.d(TAG, "Got disco for: " + presence.getFrom() + " Supports XRME: " + disco.containsFeature(Common.XMLNS_XRME));
-            if (peer_discovery_ != null) {
-              peer_discovery_.PeerFound(presence.getFrom());
+            if (peer_discovery_ != null && disco.containsFeature(Common.XMLNS_XRME)) {
+              peer_discovery_.PeerFound(presence.getFrom(), disco.getIdentities().next().getName());
             }
           } catch (XMPPException e) {
             // TODO Auto-generated catch block

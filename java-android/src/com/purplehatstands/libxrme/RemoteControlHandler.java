@@ -8,9 +8,14 @@ import org.jivesoftware.smack.packet.Packet;
 import org.jivesoftware.smack.packet.PacketExtension;
 import org.jivesoftware.smackx.ServiceDiscoveryManager;
 
+import android.util.Log;
+
 public class RemoteControlHandler extends Handler {
+  private static final String TAG = "RemoteControlHandler";
+  
   public RemoteControlHandler(RemoteControlInterface remote_control) {
     iface_ = remote_control;
+    iface_.Attach(this);
   }
 
   public void Init(Connection connection, XMPPConnection client) {
@@ -62,6 +67,7 @@ public class RemoteControlHandler extends Handler {
   }
 
   public void Next(String peer_jid_resource) {
+    Log.d(TAG, "Sending next to: " + peer_jid_resource);
     Packet iqPacket = new RemoteControlPacket("next");
     iqPacket.setTo(peer_jid_resource);
     client_.sendPacket(iqPacket);
