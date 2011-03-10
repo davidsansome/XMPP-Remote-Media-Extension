@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 find_package(Qt4 4.5.0 REQUIRED QtCore QtGui)
 find_package(PkgConfig REQUIRED)
 
-pkg_check_modules(GLOOX REQUIRED gloox>=0.9)
+pkg_check_modules(GLOOX REQUIRED gloox>=1.0)
 
 include(${QT_USE_FILE})
 
