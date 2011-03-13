@@ -36,7 +36,13 @@ public class AlbumArt extends IQ {
   }
 
   public String getChildElementXML() {
-    return null;
+    StringBuilder builder = new StringBuilder();
+    builder.append("<xrme xmlns=\"");
+    builder.append(Common.XMLNS_XRME);
+    builder.append("\">");
+    builder.append("<album_art>");
+    builder.append("</album_art>");
+    return builder.toString();
   }
 
 }
