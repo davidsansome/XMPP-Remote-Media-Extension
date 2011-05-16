@@ -57,8 +57,9 @@ public class RemoteControlHandler extends Handler {
   }
 
   public void PlayPause(String peer_jid_resource) {
-    // TODO Auto-generated method stub
-    
+    Packet iqPacket = new RemoteControlPacket("playpause");
+    iqPacket.setTo(peer_jid_resource);
+    client_.sendPacket(iqPacket);
   }
 
   public void Stop(String peer_jid_resource) {

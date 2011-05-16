@@ -6,7 +6,7 @@ public abstract class RemoteControlInterface {
   public abstract void StateChanged(String peer_jid_resource, State state);
   public abstract void AlbumArtChanged(String peer_jid_resource, Bitmap image);
   
-  protected void PlayPause(String peer_jid_resource) {
+  public void PlayPause(String peer_jid_resource) {
     if (handler_ != null) {
       handler_.PlayPause(peer_jid_resource);
     }
@@ -30,7 +30,7 @@ public abstract class RemoteControlInterface {
     }
   }
   
-  protected void QueryState(String peer_jid_resource) {
+  public void QueryState(String peer_jid_resource) {
     if (handler_ != null) {
       handler_.QueryState(peer_jid_resource);
     }

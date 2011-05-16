@@ -129,6 +129,10 @@ public final class Connection {
     peer_discovery_ = iface;
   }
   
+  public boolean IsConnected() {
+    return xmpp_ != null && xmpp_.isConnected();
+  }
+  
   public void Connect() throws XMPPException {
     if (username_ == null || username_.length() == 0 ||
         password_ == null || password_.length() == 0 ||
@@ -177,7 +181,7 @@ public final class Connection {
     final String full_jid = xmpp_.getUser();
     final String bare_jid = full_jid.split("/")[0];
     
-    Log.d(TAG, full_jid);
+    Log.d(TAG, "Logged in as: " + full_jid);
     Log.d(TAG, bare_jid);
     
     xmpp_.addPacketListener(new PacketListener() {
@@ -186,12 +190,12 @@ public final class Connection {
         Presence presence = (Presence)packet;
         Log.d(TAG, "Received presence from: " + presence.getFrom());
         String bare_from = presence.getFrom().split("/")[0];
-        if (bare_from.equals(bare_jid)) {
+        if (bare_from.equals(bare_jid) && presence.getFrom() != full_jid) {
           try {
             DiscoverInfo disco = disco_manager.discoverInfo(presence.getFrom());
             Log.d(TAG, "Got disco for: " + presence.getFrom() + " Supports XRME: " + disco.containsFeature(Common.XMLNS_XRME));
             if (peer_discovery_ != null && disco.containsFeature(Common.XMLNS_XRME)) {
-              peer_discovery_.PeerFound(presence.getFrom(), disco.getIdentities().next().getName());
+              peer_discovery_.PeerFound(new PeerDiscoveryInterface.Peer(presence.getFrom(), disco.getIdentities().next().getName()));
             }
           } catch (XMPPException e) {
             // TODO Auto-generated catch block
