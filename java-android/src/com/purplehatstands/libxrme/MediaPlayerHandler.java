@@ -8,6 +8,7 @@ public class MediaPlayerHandler extends Handler {
     iface_ = media_player;
   }
   
+  @Override
   public void Init(Connection connection, XMPPConnection client) {
     super.Init(connection, client);
     
